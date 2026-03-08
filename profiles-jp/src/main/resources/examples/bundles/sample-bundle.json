@@ -1,0 +1,43 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-001",
+  "type": "collection",
+  "timestamp": "2026-01-15T00:00:00Z",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:PAT-001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PAT-001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ENC-001",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:OBS-001",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "OBS-001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:MED-001",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "MED-001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:DOC-001",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "DOC-001"
+      }
+    }
+  ]
+}

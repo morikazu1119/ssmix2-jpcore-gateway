@@ -1,0 +1,44 @@
+{
+  "resourceType": "Observation",
+  "id": "OBS-001",
+  "meta": {
+    "lastUpdated": "2026-01-15T00:00:00Z",
+    "profile": [
+      "http://jpfhir.jp/fhir/core/StructureDefinition/JP_Observation_Common"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "urn:ssmix2:source-message-id",
+      "value": "MSG-OBS-001"
+    },
+    {
+      "system": "urn:ssmix2:source-system",
+      "value": "ssmix2-standardized-storage"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "29463-7",
+        "display": "Body weight"
+      },
+      {
+        "system": "urn:local:lab",
+        "code": "body-weight",
+        "display": "Body Weight"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/PAT-001"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-001"
+  },
+  "effectiveDateTime": "2026-01-15T00:00:00Z",
+  "valueString": "60kg"
+}
+

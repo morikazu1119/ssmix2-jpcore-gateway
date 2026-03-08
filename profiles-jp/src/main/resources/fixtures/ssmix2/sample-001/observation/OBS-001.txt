@@ -1,0 +1,7 @@
+id=OBS-001
+encounterId=ENC-001
+status=final
+code=body-weight
+value=60kg
+effectiveDateTime=2026-01-15T09:15:00+09:00
+sourceSystem=ssmix2-standardized-storage

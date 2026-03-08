@@ -1,0 +1,8 @@
+id=MED-001
+encounterId=ENC-001
+status=active
+intent=order
+medicationCode=amlodipine-5mg
+medicationText=Amlodipine 5mg tablet
+orderedAt=2026-01-15T09:20:00+09:00
+sourceSystem=ssmix2-standardized-storage

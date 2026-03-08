@@ -1,0 +1,8 @@
+resourceType: PATIENT
+profileUrl: http://jpfhir.jp/fhir/core/StructureDefinition/JP_Patient
+description: Minimal JP Core patient mapping used by the scaffold
+requiredFields:
+  - id
+  - familyName
+  - givenName
+

@@ -1,0 +1,31 @@
+{
+  "resourceType": "Patient",
+  "id": "PAT-001",
+  "meta": {
+    "lastUpdated": "2026-01-15T00:00:00Z",
+    "profile": [
+      "http://jpfhir.jp/fhir/core/StructureDefinition/JP_Patient"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "urn:ssmix2:source-message-id",
+      "value": "MSG-PAT-001"
+    },
+    {
+      "system": "urn:ssmix2:source-system",
+      "value": "ssmix2-standardized-storage"
+    }
+  ],
+  "name": [
+    {
+      "family": "Yamada",
+      "given": [
+        "Hanako"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1980-01-01"
+}
+

@@ -1,0 +1,7 @@
+resourceType: MEDICATION_REQUEST
+profileUrl: http://jpfhir.jp/fhir/core/StructureDefinition/JP_MedicationRequest
+description: Minimal JP Core medication request mapping used by the scaffold
+requiredFields:
+  - id
+  - medicationCode
+

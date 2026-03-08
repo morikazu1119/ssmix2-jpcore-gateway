@@ -1,0 +1,8 @@
+resourceType: OBSERVATION
+profileUrl: http://jpfhir.jp/fhir/core/StructureDefinition/JP_Observation_Common
+description: Minimal JP Core observation mapping used by the scaffold
+requiredFields:
+  - id
+  - code
+  - value
+

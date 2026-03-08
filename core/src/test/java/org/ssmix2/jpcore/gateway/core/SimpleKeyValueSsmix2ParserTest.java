@@ -36,6 +36,7 @@ class SimpleKeyValueSsmix2ParserTest {
         assertEquals(1, dataset.records().size());
         assertEquals(CanonicalResourceType.PATIENT, dataset.records().getFirst().resourceType());
         assertEquals("PAT-001", dataset.records().getFirst().recordId());
+        assertEquals("id=PAT-001\nfamilyName=Yamada\ngivenName=Hanako", dataset.records().getFirst().rawText());
     }
 
     @Test
@@ -50,4 +51,3 @@ class SimpleKeyValueSsmix2ParserTest {
         );
     }
 }
-

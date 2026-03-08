@@ -1,15 +1,16 @@
 package org.ssmix2.jpcore.gateway.core.canonical;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public record CanonicalPatient(
+public record CanonicalMedicationOrder(
+        String orderId,
         String patientId,
-        String familyName,
-        String givenName,
-        String gender,
-        LocalDate birthDate,
+        String encounterId,
+        String status,
+        String intent,
+        String medicationText,
+        OffsetDateTime sourceEventTime,
         String sourceMessageId,
         String sourceSystem,
         OffsetDateTime occurredAt,
@@ -20,7 +21,7 @@ public record CanonicalPatient(
         List<String> unresolvedMappings
 ) implements CanonicalResource {
 
-    public CanonicalPatient {
+    public CanonicalMedicationOrder {
         localCodes = List.copyOf(localCodes);
         standardCodes = List.copyOf(standardCodes);
         missingFields = List.copyOf(missingFields);

@@ -1,0 +1,45 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "MED-001",
+  "meta": {
+    "lastUpdated": "2026-01-15T00:00:00Z",
+    "profile": [
+      "http://jpfhir.jp/fhir/core/StructureDefinition/JP_MedicationRequest"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "urn:ssmix2:source-message-id",
+      "value": "MSG-MED-001"
+    },
+    {
+      "system": "urn:ssmix2:source-system",
+      "value": "ssmix2-standardized-storage"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "subject": {
+    "reference": "Patient/PAT-001"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-001"
+  },
+  "authoredOn": "2026-01-15T00:00:00Z",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://example.org/codeSystem/yj",
+        "code": "2171040F1024",
+        "display": "Amlodipine 5mg tablet"
+      },
+      {
+        "system": "urn:local:medication",
+        "code": "amlodipine-5mg",
+        "display": "Amlodipine 5mg tablet"
+      }
+    ],
+    "text": "Amlodipine 5mg tablet"
+  }
+}
+

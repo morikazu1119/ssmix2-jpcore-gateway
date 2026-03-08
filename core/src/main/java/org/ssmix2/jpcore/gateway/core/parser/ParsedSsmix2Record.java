@@ -9,7 +9,7 @@ public record ParsedSsmix2Record(
         CanonicalResourceType resourceType,
         String recordId,
         Map<String, String> attributes,
+        String rawText,
         Path sourceFile
 ) {
 }
-

@@ -57,7 +57,7 @@ public class GatewayIngestService {
                 bundleId,
                 request.sourcePath(),
                 result.validationSummary().valid(),
-                result.validationSummary().issues().size(),
+                result.validationSummary().issues().size() + result.mappingIssues().size(),
                 gatewayProperties.getFixtureRootHint()
         );
     }
@@ -68,4 +68,3 @@ public class GatewayIngestService {
                 .orElseThrow(() -> new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Bundle not found: " + bundleId));
     }
 }
-

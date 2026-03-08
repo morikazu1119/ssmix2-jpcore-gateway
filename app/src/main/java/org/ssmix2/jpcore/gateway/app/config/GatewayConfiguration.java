@@ -14,8 +14,10 @@ import org.ssmix2.jpcore.gateway.core.mapping.FhirBundleMapper;
 import org.ssmix2.jpcore.gateway.core.parser.SimpleKeyValueSsmix2Parser;
 import org.ssmix2.jpcore.gateway.core.parser.Ssmix2Parser;
 import org.ssmix2.jpcore.gateway.core.service.ConversionPipeline;
+import org.ssmix2.jpcore.gateway.core.validation.DelegatingMappedResourceValidationService;
 import org.ssmix2.jpcore.gateway.core.validation.FhirValidationService;
 import org.ssmix2.jpcore.gateway.core.validation.HapiFhirValidationService;
+import org.ssmix2.jpcore.gateway.core.validation.MappedResourceValidationService;
 import org.ssmix2.jpcore.gateway.profiles.jp.JpCoreFhirBundleMapper;
 import org.ssmix2.jpcore.gateway.profiles.jp.JpCoreMappingDefinitionCatalog;
 
@@ -54,11 +56,16 @@ public class GatewayConfiguration {
     }
 
     @Bean
+    public MappedResourceValidationService mappedResourceValidationService(FhirValidationService fhirValidationService) {
+        return new DelegatingMappedResourceValidationService(fhirValidationService);
+    }
+
+    @Bean
     public ConversionPipeline conversionPipeline(
             Ssmix2Parser parser,
             CanonicalModelAssembler assembler,
             FhirBundleMapper mapper,
-            FhirValidationService validationService
+            MappedResourceValidationService validationService
     ) {
         return new ConversionPipeline(parser, assembler, mapper, validationService);
     }
@@ -83,4 +90,3 @@ public class GatewayConfiguration {
         return new GatewayIngestService(conversionPipeline, bundleStore, auditService, properties);
     }
 }
-

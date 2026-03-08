@@ -1,0 +1,50 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "DOC-001",
+  "meta": {
+    "lastUpdated": "2026-01-15T00:00:00Z",
+    "profile": [
+      "http://jpfhir.jp/fhir/core/StructureDefinition/JP_DocumentReference"
+    ]
+  },
+  "identifier": [
+    {
+      "system": "urn:ssmix2:source-message-id",
+      "value": "MSG-DOC-001"
+    },
+    {
+      "system": "urn:ssmix2:source-system",
+      "value": "ssmix2-standardized-storage"
+    }
+  ],
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "18842-5",
+        "display": "Discharge summary"
+      },
+      {
+        "system": "urn:local:document-type",
+        "code": "discharge-summary",
+        "display": "Discharge Summary"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/PAT-001"
+  },
+  "date": "2026-01-15T00:00:00Z",
+  "description": "Discharge Summary",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "url": "urn:ssmix2:document:DOC-001",
+        "title": "Discharge Summary"
+      }
+    }
+  ]
+}
+

@@ -7,8 +7,13 @@ public record CanonicalDataSet(
         CanonicalPatient patient,
         List<CanonicalEncounter> encounters,
         List<CanonicalObservation> observations,
-        List<CanonicalMedicationRequest> medicationRequests,
-        List<CanonicalDocumentReference> documentReferences
+        List<CanonicalMedicationOrder> medicationOrders,
+        List<CanonicalDocument> documents
 ) {
+    public CanonicalDataSet {
+        encounters = List.copyOf(encounters);
+        observations = List.copyOf(observations);
+        medicationOrders = List.copyOf(medicationOrders);
+        documents = List.copyOf(documents);
+    }
 }
-

@@ -47,6 +47,10 @@ Conversion flow:
 3. `FhirBundleMapper` produces a FHIR R4 `Bundle`.
 4. `FhirValidationService` validates the output before it is returned or stored.
 
+## Why Canonical Modeling Exists
+
+Canonical modeling isolates source-specific SS-MIX2 parsing concerns from downstream output concerns. This keeps the core domain model independent from FHIR classes, makes assumptions visible, and gives the project a stable place to track missing fields, local codes, unresolved mappings, and raw source text before any target-specific serialization is attempted.
+
 ## Narrow Fixture Format Used In This Scaffold
 
 This first pass does **not** implement real SS-MIX2 parsing. Instead, it accepts a documented placeholder layout under resource-type directories:
@@ -122,4 +126,3 @@ The build targets Java 21 and uses the Gradle wrapper.
 ## Testing
 
 The first pass includes JUnit 5 tests for the core parser, canonical assembler, and conversion pipeline abstractions.
-

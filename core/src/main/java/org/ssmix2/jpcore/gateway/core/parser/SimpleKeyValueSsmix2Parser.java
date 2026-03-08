@@ -76,8 +76,10 @@ public class SimpleKeyValueSsmix2Parser implements Ssmix2Parser {
 
     private ParsedSsmix2Record parseRecord(CanonicalResourceType resourceType, Path sourceFile) {
         Map<String, String> attributes = new HashMap<>();
+        String rawText;
         try {
             List<String> lines = Files.readAllLines(sourceFile);
+            rawText = String.join(System.lineSeparator(), lines);
             for (String line : lines) {
                 String trimmed = line.trim();
                 if (trimmed.isEmpty() || trimmed.startsWith("#")) {
@@ -102,6 +104,6 @@ public class SimpleKeyValueSsmix2Parser implements Ssmix2Parser {
         }
 
         String recordId = attributes.getOrDefault("id", sourceFile.getFileName().toString());
-        return new ParsedSsmix2Record(resourceType, recordId, Map.copyOf(attributes), sourceFile);
+        return new ParsedSsmix2Record(resourceType, recordId, Map.copyOf(attributes), rawText, sourceFile);
     }
 }

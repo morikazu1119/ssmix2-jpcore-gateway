@@ -1,59 +1,60 @@
 # ssmix2-jpcore-gateway
 
-`ssmix2-jpcore-gateway` is a read-only, intentionally narrow OSS gateway that converts a limited subset of SS-MIX2 standardized storage inputs into Japanese FHIR R4 artifacts aligned with JP Core where practical.
+`ssmix2-jpcore-gateway` は、SS-MIX2 標準化ストレージの限定的な入力を、日本向け FHIR R4 成果物へ変換するための、読み取り専用で意図的にスコープを絞った OSS ゲートウェイです。出力は実用上可能な範囲で JP Core に合わせます。
 
-## Purpose
+## 目的
 
-- Provide a maintainable reference implementation for SS-MIX2 to FHIR conversion.
-- Keep parsing, canonical modeling, mapping, and validation clearly separated.
-- Support file-based ingest for an MVP that is easy to understand and test.
+- SS-MIX2 から FHIR への変換について、保守しやすいリファレンス実装を提供する
+- パース、canonical modeling、mapping、validation を明確に分離する
+- MVP として理解しやすく、テストしやすいファイルベース取り込みを提供する
 
-## MVP Scope
+## MVP の対象範囲
 
-- Input: file-based ingest from a very limited subset of SS-MIX2-like fixture data.
-- Output: FHIR R4 `Bundle` output containing `Patient`, `Encounter`, `Observation`, `MedicationRequest`, and `DocumentReference`.
-- Read-only conversion only.
-- Built-in validation using HAPI FHIR validator wrappers.
+- 入力: 非常に限定した SS-MIX2 風 fixture データをファイルベースで取り込む
+- 出力: `Patient`、`Encounter`、`Observation`、`MedicationRequest`、`DocumentReference` を含む FHIR R4 `Bundle`
+- 読み取り専用の変換のみ
+- HAPI FHIR ベースの validation を組み込みで提供する
 
-## Non-Goals
+## 非対象
 
-- Full EMR behavior.
-- Bidirectional sync or write-back.
-- Realtime conversion pipelines.
-- SMART on FHIR or production-grade auth.
-- Full SS-MIX2 coverage or support for every Japanese profile.
-- A production-ready universal converter.
+- 完全な EMR の振る舞い
+- 双方向同期や write-back
+- リアルタイム変換パイプライン
+- SMART on FHIR や本番向けの認証・認可
+- SS-MIX2 全体の網羅
+- すべての日本向けプロファイルへの対応
+- 本番投入前提の汎用コンバータ
 
-## Architecture
+## アーキテクチャ
 
-The repository is a Gradle multi-module monorepo:
+このリポジトリは Gradle のマルチモジュール monorepo です。
 
 ```text
 .
 ├── app
-│   └── Spring Boot REST API, ingest endpoints, audit logging, config, health
+│   └── Spring Boot REST API、取り込みエンドポイント、監査ログ、設定、ヘルスチェック
 ├── core
-│   └── parser contracts, canonical model, mapping contracts, validation wrapper
+│   └── parser 契約、canonical model、mapping 契約、validation wrapper
 ├── profiles-jp
-│   └── JP Core mapping definitions, fixtures, conformance matrix, examples
+│   └── JP Core mapping 定義、fixtures、conformance matrix、出力例
 └── deploy
-    └── Docker Compose, env templates, local dev scripts, container image
+    └── Docker Compose、環境変数テンプレート、ローカル開発用スクリプト、コンテナイメージ
 ```
 
-Conversion flow:
+変換フローは次のとおりです。
 
-1. `Ssmix2Parser` reads a constrained file layout from disk.
-2. `CanonicalModelAssembler` builds a canonical intermediate model.
-3. `FhirBundleMapper` produces a FHIR R4 `Bundle`.
-4. `FhirValidationService` validates the output before it is returned or stored.
+1. `Ssmix2Parser` がディスク上の制約付き入力レイアウトを読む
+2. `CanonicalModelAssembler` が canonical intermediate model を組み立てる
+3. `FhirBundleMapper` が FHIR R4 `Bundle` を生成する
+4. `FhirValidationService` が生成結果を validation する
 
-## Why Canonical Modeling Exists
+## canonical modeling を置く理由
 
-Canonical modeling isolates source-specific SS-MIX2 parsing concerns from downstream output concerns. This keeps the core domain model independent from FHIR classes, makes assumptions visible, and gives the project a stable place to track missing fields, local codes, unresolved mappings, and raw source text before any target-specific serialization is attempted.
+canonical modeling は、SS-MIX2 側の source 固有事情を、出力先固有事情から切り離すための層です。これにより core のドメインモデルを FHIR クラスから独立させたまま、欠損項目、ローカルコード、未解決 mapping、raw source text を明示的に保持できます。変換時の仮定を見えやすくし、後続の target 別 serializer を差し替えやすくする狙いがあります。
 
-## Narrow Fixture Format Used In This Scaffold
+## この scaffold で使う限定 fixture 形式
 
-This first pass does **not** implement real SS-MIX2 parsing. Instead, it accepts a documented placeholder layout under resource-type directories:
+この最初の実装では、実際の SS-MIX2 パースはまだ行いません。代わりに、resource type ごとのディレクトリ配下に置いた簡易 fixture を読み込みます。
 
 ```text
 sample-001/
@@ -64,26 +65,26 @@ sample-001/
 └── document-reference/DOC-001.txt
 ```
 
-Each file contains `key=value` pairs. This is deliberately limited so the pipeline remains explicit and testable. Real SS-MIX2 standardized storage parsing is left as a tracked TODO.
+各ファイルの中身は `key=value` 形式です。これはパイプラインを明示的かつテスト可能に保つための意図的な制限です。実際の SS-MIX2 標準化ストレージ解析は今後の TODO としています。
 
-## Local Setup
+## ローカルセットアップ
 
-### Option 1: Docker Compose
+### 方法 1: Docker Compose
 
-1. Copy `deploy/env/.env.example` to `deploy/env/.env`.
-2. Start the stack:
+1. `deploy/env/.env.example` を `deploy/env/.env` にコピーする
+2. スタックを起動する
 
    ```bash
    ./deploy/scripts/dev-up.sh
    ```
 
-3. Check health:
+3. ヘルスチェックを確認する
 
    ```bash
    curl http://localhost:8080/health
    ```
 
-4. Trigger a sample ingest:
+4. サンプル取り込みを実行する
 
    ```bash
    curl -X POST http://localhost:8080/ingest/ssmix2 \
@@ -95,44 +96,44 @@ Each file contains `key=value` pairs. This is deliberately limited so the pipeli
      }'
    ```
 
-5. Retrieve the generated bundle:
+5. 生成された bundle を取得する
 
    ```bash
    curl http://localhost:8080/fhir/Bundle/sample-001
    ```
 
-### Option 2: Gradle
+### 方法 2: Gradle
 
-The build targets Java 21 and uses the Gradle wrapper.
+ビルド対象は Java 21 で、Gradle wrapper を使います。
 
 ```bash
 ./gradlew test
 ./gradlew :app:bootRun
 ```
 
-## Assumptions And Explicit Gaps
+## 前提と明示的なギャップ
 
-- The parser currently supports only a tiny, file-system based subset of input.
-- Mapping logic is intentionally skeletal and documents unsupported assumptions with explicit TODOs.
-- Validation is wired through HAPI FHIR base R4 validation support. JP Core package-based validation is a follow-up task.
-- Bundle persistence is in-memory for the scaffold. PostgreSQL is provisioned in `deploy/` for the next increment.
+- parser が扱えるのは、現時点では非常に小さなファイルベース入力だけ
+- mapping ロジックは意図的に最小構成で、非自明な前提は明示的な TODO として残す
+- validation は HAPI FHIR の基本的な R4 validation に接続している。JP Core package ベース validation は今後の課題
+- bundle 永続化は現時点ではメモリ内のみ。次段階のために `deploy/` には PostgreSQL を用意している
 
 ## Validation
 
-Validation runs after bundle generation. The current MVP path validates the generated `Bundle` and each entry resource through a thin validation service abstraction backed by HAPI FHIR validator tooling. Validation issues are normalized into a small project format with `severity`, `location`, `message`, and `profile` when the profile can be inferred from resource metadata.
+validation は bundle 生成後に実行します。現在の MVP では、生成された `Bundle` と各 entry resource を、HAPI FHIR validator tooling を薄く包んだ validation service abstraction 経由で検証します。validation 結果は `severity`、`location`、`message`、`profile` を持つ小さな共通形式に正規化します。`profile` は resource metadata から分かる場合のみ設定します。
 
-This is intentionally narrow:
+意図的にスコープを絞っている点は次のとおりです。
 
-- use HAPI-based structural validation now
-- keep the validation service replaceable later
-- leave JP Core package loading and stronger terminology validation as follow-up work
+- まずは HAPI ベースの構造 validation を使う
+- validation service 自体は差し替え可能な interface にしておく
+- JP Core package 読み込みや強い terminology validation は今後の課題にする
 
-## API Placeholders
+## API placeholder
 
 - `POST /ingest/ssmix2`
 - `GET /fhir/Bundle/{id}`
 - `GET /health`
 
-## Testing
+## テスト
 
-The first pass includes JUnit 5 tests for the core parser, canonical assembler, and conversion pipeline abstractions.
+現時点の初期実装には、core parser、canonical assembler、conversion pipeline abstraction、FHIR mapping、validation formatting に対する JUnit 5 テストを含めています。

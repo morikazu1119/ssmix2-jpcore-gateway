@@ -1,0 +1,6 @@
+id=MED-001
+encounterId=ENC-001
+status=active
+intent=order
+medicationCode=amlodipine-5mg
+

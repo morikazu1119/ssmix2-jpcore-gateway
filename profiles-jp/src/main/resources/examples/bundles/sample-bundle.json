@@ -1,0 +1,21 @@
+{
+  "resourceType": "Bundle",
+  "id": "sample-001",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:PAT-001",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PAT-001"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ENC-001",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-001"
+      }
+    }
+  ]
+}

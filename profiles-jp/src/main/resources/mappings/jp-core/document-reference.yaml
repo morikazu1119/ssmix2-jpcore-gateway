@@ -1,0 +1,8 @@
+resourceType: DOCUMENT_REFERENCE
+profileUrl: http://jpfhir.jp/fhir/core/StructureDefinition/JP_DocumentReference
+description: Minimal JP Core document reference mapping used by the scaffold
+requiredFields:
+  - id
+  - typeCode
+  - title
+

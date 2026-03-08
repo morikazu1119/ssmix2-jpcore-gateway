@@ -1,0 +1,8 @@
+resourceType: ENCOUNTER
+profileUrl: http://jpfhir.jp/fhir/core/StructureDefinition/JP_Encounter
+description: Minimal JP Core encounter mapping used by the scaffold
+requiredFields:
+  - id
+  - status
+  - classCode
+

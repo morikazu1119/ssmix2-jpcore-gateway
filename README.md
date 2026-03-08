@@ -1,136 +1,125 @@
-# テンプレートリポジトリ
+# ssmix2-jpcore-gateway
 
-## 概要
+`ssmix2-jpcore-gateway` is a read-only, intentionally narrow OSS gateway that converts a limited subset of SS-MIX2 standardized storage inputs into Japanese FHIR R4 artifacts aligned with JP Core where practical.
 
-このリポジトリは、Dockerを使用したPython開発環境のテンプレートです。
-再現性の高い開発環境を迅速に構築することを目的としています。
+## Purpose
 
-主な特徴:
-- DockerおよびDocker Composeによる環境構築
-- Pythonの静的解析ツールを標準で導入
-  - Linter: [Ruff](https://github.com/astral-sh/ruff)
-  - Formatter: [Black](https://github.com/psf/black)
-  - Type Checker: [Mypy](http://mypy-lang.org/)
-- VSCodeでの開発を想定した設定ファイル同梱
-- `pre-commit`によるコード品質の自動チェック
+- Provide a maintainable reference implementation for SS-MIX2 to FHIR conversion.
+- Keep parsing, canonical modeling, mapping, and validation clearly separated.
+- Support file-based ingest for an MVP that is easy to understand and test.
 
----
+## MVP Scope
 
-## セットアップ
+- Input: file-based ingest from a very limited subset of SS-MIX2-like fixture data.
+- Output: FHIR R4 `Bundle` output containing `Patient`, `Encounter`, `Observation`, `MedicationRequest`, and `DocumentReference`.
+- Read-only conversion only.
+- Built-in validation using HAPI FHIR validator wrappers.
 
-### 前提条件
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/) (推奨)
-- `bash`互換シェル
+## Non-Goals
 
-### 手順
-1. このリポジトリをクローンまたはテンプレートとして使用します。
+- Full EMR behavior.
+- Bidirectional sync or write-back.
+- Realtime conversion pipelines.
+- SMART on FHIR or production-grade auth.
+- Full SS-MIX2 coverage or support for every Japanese profile.
+- A production-ready universal converter.
+
+## Architecture
+
+The repository is a Gradle multi-module monorepo:
+
+```text
+.
+├── app
+│   └── Spring Boot REST API, ingest endpoints, audit logging, config, health
+├── core
+│   └── parser contracts, canonical model, mapping contracts, validation wrapper
+├── profiles-jp
+│   └── JP Core mapping definitions, fixtures, conformance matrix, examples
+└── deploy
+    └── Docker Compose, env templates, local dev scripts, container image
+```
+
+Conversion flow:
+
+1. `Ssmix2Parser` reads a constrained file layout from disk.
+2. `CanonicalModelAssembler` builds a canonical intermediate model.
+3. `FhirBundleMapper` produces a FHIR R4 `Bundle`.
+4. `FhirValidationService` validates the output before it is returned or stored.
+
+## Narrow Fixture Format Used In This Scaffold
+
+This first pass does **not** implement real SS-MIX2 parsing. Instead, it accepts a documented placeholder layout under resource-type directories:
+
+```text
+sample-001/
+├── patient/PAT-001.txt
+├── encounter/ENC-001.txt
+├── observation/OBS-001.txt
+├── medication-request/MED-001.txt
+└── document-reference/DOC-001.txt
+```
+
+Each file contains `key=value` pairs. This is deliberately limited so the pipeline remains explicit and testable. Real SS-MIX2 standardized storage parsing is left as a tracked TODO.
+
+## Local Setup
+
+### Option 1: Docker Compose
+
+1. Copy `deploy/env/.env.example` to `deploy/env/.env`.
+2. Start the stack:
+
    ```bash
-   git clone https://github.com/your_username/your_repository.git
-   cd your_repository
+   ./deploy/scripts/dev-up.sh
    ```
 
-2. `pre-commit`フックをセットアップします。(推奨)
+3. Check health:
+
    ```bash
-   pip install pre-commit
-   pre-commit install
+   curl http://localhost:8080/health
    ```
 
----
+4. Trigger a sample ingest:
 
-## コンテナの利用方法
+   ```bash
+   curl -X POST http://localhost:8080/ingest/ssmix2 \
+     -H 'Content-Type: application/json' \
+     -d '{
+       "bundleId": "sample-001",
+       "facilityId": "demo-hospital",
+       "sourcePath": "/fixtures/ssmix2/sample-001"
+     }'
+   ```
 
-コンテナのビルドと実行には、2つの方法があります。
+5. Retrieve the generated bundle:
 
-### 方法1: シェルスクリプトを利用する
+   ```bash
+   curl http://localhost:8080/fhir/Bundle/sample-001
+   ```
 
-`docker-build.sh`と`docker-run.sh`スクリプトを使って、手動でイメージのビルドとコンテナの起動を行います。
+### Option 2: Gradle
 
-#### 1. イメージのビルド
-`docker-build.sh` を実行して、Dockerイメージをビルドします。
+The build targets Java 21 and uses the Gradle wrapper.
 
-**書式:**
 ```bash
-./docker-build.sh <プロジェクト名> <requirements.txtのパス> [ユーザー名] [ユーザーID]
+./gradlew test
+./gradlew :app:bootRun
 ```
 
-**実行例:**
-`sample.txt`の要求仕様で、`my-project`という名前のイメージをビルドします。
-```bash
-./docker-build.sh my-project requirements/sample.txt
-```
-これにより、`${USER}_my-project` という名前のDockerイメージが作成されます。
+## Assumptions And Explicit Gaps
 
-#### 2. コンテナの起動
-`docker-run.sh` を実行して、ビルドしたイメージからコンテナを起動します。
+- The parser currently supports only a tiny, file-system based subset of input.
+- Mapping logic is intentionally skeletal and documents unsupported assumptions with explicit TODOs.
+- Validation is wired through HAPI FHIR base R4 validation support. JP Core package-based validation is a follow-up task.
+- Bundle persistence is in-memory for the scaffold. PostgreSQL is provisioned in `deploy/` for the next increment.
 
-**書式:**
-```bash
-./docker-run.sh <ユーザー名> <プロジェクト名> [ホスト側ポート] [コンテナ名]
-```
+## API Placeholders
 
-**実行例:**
-`kazuki`ユーザーで、`my-project`プロジェクトのコンテナを起動します。ホストのポート`2222`をコンテナの`22`番ポートにマッピングします。
-```bash
-./docker-run.sh kazuki my-project 2222
-```
-これにより、`kazuki_my-project`という名前のコンテナが起動します。
+- `POST /ingest/ssmix2`
+- `GET /fhir/Bundle/{id}`
+- `GET /health`
 
----
+## Testing
 
-### 方法2: Docker Composeを利用する (推奨)
+The first pass includes JUnit 5 tests for the core parser, canonical assembler, and conversion pipeline abstractions.
 
-`docker-compose.yml` を利用して、より簡単にサービスを管理できます。
-
-#### 1. 設定ファイルの作成
-プロジェクトのルートに `.env` ファイルを作成し、環境変数を設定します。
-
-**.env ファイルの例:**
-```env
-# --- General ---
-TZ=Asia/Tokyo
-
-# --- Docker Compose ---
-# Service name and container name prefix
-COMPOSE_PROJECT_NAME=my-project
-
-# --- Build Arguments ---
-# User settings for inside the container
-UNAME=kazuki
-UID=1000
-# Project name used for the image tag (e.g., kazuki_my-project)
-PROJECT=my-project
-# Path to requirements file
-REQUIREMENTS=requirements/sample.txt
-
-# --- Runtime Settings ---
-# Host port to map to the container's SSH port (22)
-PORT=2222
-# Host path to mount as the data directory
-HOST_DATA_PATH=./data
-```
-
-#### 2. イメージのビルド
-`docker-compose build` コマンドでイメージをビルドします。`.env`ファイルの値が自動的に読み込まれます。
-```bash
-docker-compose build
-```
-
-#### 3. コンテナの起動
-`docker-compose up` コマンドでコンテナを起動します。
-```bash
-# フォアグラウンドで起動
-docker-compose up
-
-# バックグラウンドで起動
-docker-compose up -d
-```
-
-#### 4. コンテナの停止・削除
-```bash
-# 停止
-docker-compose down
-
-# ボリュームも削除する場合
-docker-compose down -v
-```

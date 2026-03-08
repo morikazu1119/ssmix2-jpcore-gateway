@@ -1,0 +1,6 @@
+id=DOC-001
+status=current
+typeCode=discharge-summary
+title=Discharge Summary
+contentType=text/plain
+

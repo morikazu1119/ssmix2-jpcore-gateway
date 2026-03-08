@@ -5,12 +5,14 @@ import ca.uhn.fhir.validation.FhirValidator;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HapiFhirValidationService implements FhirValidationService {
 
-    private final FhirValidator validator;
+    private final HapiValidationExecutor validationExecutor;
     private final boolean instanceValidationEnabled;
+    private final HapiValidationMessageFormatter messageFormatter;
 
     public HapiFhirValidationService(FhirContext fhirContext) {
         FhirValidator fhirValidator = fhirContext.newValidator();
@@ -23,32 +25,43 @@ public class HapiFhirValidationService implements FhirValidationService {
             // TODO: Replace fallback behavior with explicit JP Core package validation wiring.
         }
 
-        this.validator = fhirValidator;
+        this.validationExecutor = fhirValidator::validateWithResult;
+        this.messageFormatter = new HapiValidationMessageFormatter();
         this.instanceValidationEnabled = enabled;
+    }
+
+    public HapiFhirValidationService(
+            HapiValidationExecutor validationExecutor,
+            boolean instanceValidationEnabled,
+            HapiValidationMessageFormatter messageFormatter
+    ) {
+        this.validationExecutor = validationExecutor;
+        this.instanceValidationEnabled = instanceValidationEnabled;
+        this.messageFormatter = messageFormatter;
     }
 
     @Override
     public ValidationSummary validate(IBaseResource resource) {
-        ca.uhn.fhir.validation.ValidationResult result = validator.validateWithResult(resource);
-        List<ValidationIssue> issues = result.getMessages().stream()
-                .map(message -> new ValidationIssue(
-                        message.getSeverity().name(),
-                        message.getLocationString(),
-                        message.getMessage()
-                ))
-                .toList();
+        try {
+            ca.uhn.fhir.validation.ValidationResult result = validationExecutor.validate(resource);
+            List<ValidationIssue> issues = new ArrayList<>(result.getMessages().stream()
+                    .map(message -> messageFormatter.format(message, resource))
+                    .toList());
 
-        if (!instanceValidationEnabled) {
-            issues = java.util.stream.Stream.concat(
-                    issues.stream(),
-                    java.util.stream.Stream.of(new ValidationIssue(
-                            "WARNING",
-                            resource.fhirType(),
-                            "Instance validator fallback is active; only minimal validation is guaranteed."
-                    ))
-            ).toList();
+            if (!instanceValidationEnabled) {
+                issues.add(new ValidationIssue(
+                        "WARNING",
+                        resource.fhirType(),
+                        "Instance validator fallback is active; only minimal validation is guaranteed.",
+                        resource instanceof org.hl7.fhir.r4.model.Resource r && !r.getMeta().getProfile().isEmpty()
+                                ? r.getMeta().getProfile().getFirst().getValue()
+                                : null
+                ));
+            }
+
+            return new ValidationSummary(result.isSuccessful() || !instanceValidationEnabled, issues);
+        } catch (RuntimeException | AssertionError exception) {
+            return new ValidationSummary(false, List.of(messageFormatter.formatFailure(resource, exception)));
         }
-
-        return new ValidationSummary(result.isSuccessful() || !instanceValidationEnabled, issues);
     }
 }

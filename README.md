@@ -117,6 +117,16 @@ The build targets Java 21 and uses the Gradle wrapper.
 - Validation is wired through HAPI FHIR base R4 validation support. JP Core package-based validation is a follow-up task.
 - Bundle persistence is in-memory for the scaffold. PostgreSQL is provisioned in `deploy/` for the next increment.
 
+## Validation
+
+Validation runs after bundle generation. The current MVP path validates the generated `Bundle` and each entry resource through a thin validation service abstraction backed by HAPI FHIR validator tooling. Validation issues are normalized into a small project format with `severity`, `location`, `message`, and `profile` when the profile can be inferred from resource metadata.
+
+This is intentionally narrow:
+
+- use HAPI-based structural validation now
+- keep the validation service replaceable later
+- leave JP Core package loading and stronger terminology validation as follow-up work
+
 ## API Placeholders
 
 - `POST /ingest/ssmix2`

@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  torch:
+    # Image/tag name: UNAME_PROJECT
+    image: "${UNAME:-user}_${PROJECT:-project}"
+    container_name: "${UNAME:-user}_${PROJECT:-project}"
+
+    build:
+      context: "${BUILD_CONTEXT:-.}"
+      dockerfile: "${DOCKERFILE:-dockerfile}"
+      args:
+        UNAME: "${UNAME:-user}"
+        UID: "${UID:-1000}"
+        PROJECT: "${PROJECT:-project}"
+        REQUIREMENTS: "${REQUIREMENTS:-requirements/torch_latest.txt}"
+
+    working_dir: "/home/${UNAME:-user}"
+
+    environment:
+      TZ: "${TZ:-Asia/Tokyo}"
+
+    ports:
+      - "${PORT:-2222}:22"
+
+    volumes:
+      - "${HOST_DATA_PATH:-/mnt/c/mnt/data}:/home/${UNAME:-user}/data"
+      - slum-volume:/mnt/slum
+
+    gpus: all
+    shm_size: "64gb"
+    restart: always
+
+    tty: true
+    stdin_open: true
+
+volumes:
+  slum-volume:

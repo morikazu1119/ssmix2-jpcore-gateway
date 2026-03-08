@@ -1,0 +1,3 @@
+jupyterlab
+huggingface_hub[cli]
+unsloth[cu121-torch240] @ git+https://github.com/unslothai/unsloth.git@main#egg=unsloth
